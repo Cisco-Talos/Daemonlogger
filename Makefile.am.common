@@ -1,0 +1,5 @@
+## $Id: Makefile.am.common,v 1.1 2007/01/29 22:56:53 roesch Exp $
+
+AUTOMAKE_OPTIONS = foreign no-dependencies
+
+DISTCLEANFILES = *~ stamp-h.in
