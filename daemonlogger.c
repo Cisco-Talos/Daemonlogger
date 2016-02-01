@@ -199,6 +199,7 @@ static Filelist file_list;
 /* Runtime config struct */
 typedef struct _rt_config
 {
+    int buffer_size;
     int count;
     int daemon_mode;
     int rollover;
@@ -826,18 +827,45 @@ static int start_sniffing()
         }
 
         msg("sniffing on interface %s", rt_config.interface);
-        rt_config.pd = pcap_open_live(rt_config.interface, 
-                            rt_config.snaplen?rt_config.snaplen:65535, 
-                            1, 
-                            500, 
-                            errorbuf);
+        rt_config.pd = pcap_create(rt_config.interface,
+                                   errorbuf);
 
         if(rt_config.pd == NULL)
         {
-            fatal("start_sniffing(): interface %s open: %s\n", 
-                    rt_config.interface, 
-                    errorbuf);
-        }        
+            fatal("start_sniffing(): unable to create packet capture handle: %s\n",
+                  errorbuf);
+        }
+        
+        if(pcap_set_snaplen(rt_config.pd, rt_config.snaplen?rt_config.snaplen:65535) == 0)
+        {
+            msg("start_sniffing(): snapshot length option set to %d", rt_config.snaplen?rt_config.snaplen:65535);
+        }
+        else
+        {
+            fatal("start_sniffing(): unable to set snaplength option\n");
+        }
+        
+        if(pcap_set_promisc(rt_config.pd, 1) != 0)
+        {
+            fatal("start_sniffing(): unable to set promiscuous option\n");
+        }
+        if(pcap_set_timeout(rt_config.pd, 500) != 0)
+        {
+            fatal("start_sniffing(): unable to set timeout option\n");
+        }
+        if(pcap_set_buffer_size(rt_config.pd, rt_config.buffer_size?rt_config.buffer_size:2000000) == 0)
+        {
+            msg("start_sniffing(): buffer size option set to %d", rt_config.buffer_size?rt_config.buffer_size:2000000);
+        }
+        else
+        {
+            fatal("start_sniffing(): unable to set packet buffer size option\n");
+        }
+        
+        if(pcap_activate(rt_config.pd) != 0)
+        {
+            fatal("start_sniffing(): unable to activate packet capture\n");
+        }  
     }
     else
     {
@@ -1127,6 +1155,7 @@ static void usage()
 {
     printf("USAGE: daemonlogger [-options] <bpf filter>\n");
     printf("        -a <path>       Set archive directory path to <path>\n");
+    printf("        -B <bytes>      Set packet capture buffer size\n");
     printf("        -c <count>      Log <count> packets and exit\n");
     printf("        -d              Daemonize at startup\n");
     printf("        -f <bpf file>   Load BPF filter from <bpf file>\n");
@@ -1168,12 +1197,15 @@ int parse_cmd_line(int argc, char *argv[])
     int bpf_file = 0;
 
     while((ch = getopt(argc, argv, 
-            "a:c:df:Fg:hi:l:m:M:n:o:p:P:rR:s:S:t:T:u:vz"))!=-1)
+            "a:B:c:df:Fg:hi:l:m:M:n:o:p:P:rR:s:S:t:T:u:vz"))!=-1)
     {
         switch(ch)
         {
             case 'a':
                 rt_config.archivepath = strdup(optarg);
+                break;
+            case 'B':
+                rt_config.buffer_size = atoi(optarg);
                 break;
             case 'c':
                 rt_config.count = atoi(optarg);
@@ -1336,6 +1368,8 @@ int parse_cmd_line(int argc, char *argv[])
     
     if(rt_config.archivepath != NULL)
         printf("[-] Archive directory set to %s, ringbuffer mode will archive instead of deleting files.\n", rt_config.archivepath);
+    if(rt_config.buffer_size)
+        printf("[-] Packet capture buffer set to %d bytes\n", rt_config.buffer_size);
     if(rt_config.count)
         printf("[-] Configured to log %d packets\n", rt_config.count);
     if(rt_config.daemon_mode)
