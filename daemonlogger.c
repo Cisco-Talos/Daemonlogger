@@ -576,7 +576,11 @@ static int prune_oldest_file_in_dir()
     closedir(dirp);
     msg("[!] Ringbuffer: deleting %s", oldname);
     if(*oldname != 0)
+    {
         unlink(oldname);
+        return 1;
+    }
+    
     return 0;
 }
 
@@ -584,6 +588,7 @@ static int open_log_file()
 {
     struct file_entry *fe;
     char *filepath = get_filename();
+    int prune_retval = 0;
     
     if(rt_config.maxfiles == 0 || (rt_config.maxfiles > 0 && rt_config.filecount > 0))
     {
@@ -613,21 +618,36 @@ static int open_log_file()
     
     if(rt_config.maxpct != 0)
     {
-        d_statfs_t s;
-        if(d_statfs(rt_config.testpath, &s) != 0)
+        do
         {
-            perror("Unable to stat partition!\n");
-            fatal("EPIC FAIL!");
-        }
-        
-        if((s.f_bavail - rt_config.rollsize_in_blocks) < rt_config.part_min_free_blocks)
-        {
-            msg("Disk max utilization reached, rolling over and pruning");
-            if(rt_config.prune_flag == PRUNE_OLDEST_IN_RUN)
-                prune_oldest_file_this_run();
+            d_statfs_t s;
+            if(d_statfs(rt_config.testpath, &s) != 0)
+            {
+                perror("Unable to stat partition!\n");
+                fatal("EPIC FAIL!");
+            }
+            
+            if((s.f_bavail - rt_config.rollsize_in_blocks) < rt_config.part_min_free_blocks)
+            {
+                msg("Disk max utilization reached, rolling over and pruning");
+                if(rt_config.prune_flag == PRUNE_OLDEST_IN_RUN)
+                {
+                    prune_oldest_file_this_run();
+                    break;
+                }
+                else
+                {
+                    prune_retval = prune_oldest_file_in_dir();
+                    
+                    /* If there was nothing to prune */
+                    if (prune_retval == 0)
+                        break;
+                }
+            }
             else
-                prune_oldest_file_in_dir();
+                break;
         }
+        while (1);
     }
     
     if(filepath != NULL)
