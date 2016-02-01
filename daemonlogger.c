@@ -208,6 +208,7 @@ typedef struct _rt_config
     int datalink;
     int shutdown_requested;
     int restart_requested;
+    int dump_stats_requested;
     int ringbuffer;
     int use_syslog;
     int readback_mode;
@@ -456,6 +457,18 @@ char *get_filename()
     return daemonize();
 }
 */
+
+static void dl_dump_stats()
+{
+    struct pcap_stat stats;
+    pcap_stats(rt_config.pd, &stats);
+    
+    msg("");
+    msg("%u packets received", stats.ps_recv);
+    msg("%u packets dropped by kernel (%0.2f%%)", stats.ps_drop, (stats.ps_recv > 0) ? ((float)stats.ps_drop / (float)stats.ps_recv) * 100.0f : 0.0f);
+    msg("%u packets dropped by interface", stats.ps_ifdrop);
+}
+
 static void dl_shutdown(int signal)
 {
     msg("Quitting!");
@@ -473,12 +486,20 @@ static void dl_shutdown(int signal)
     }
     
     if(rt_config.pd != NULL)
+    {
+        dl_dump_stats();
         pcap_close(rt_config.pd);
+    }
 
     if(rt_config.true_pid_name != NULL)
         unlink(rt_config.true_pid_name);
     
     exit(0);
+}
+
+static void dump_stats(int signal)
+{
+    rt_config.dump_stats_requested = 1;
 }
 
 static void quitter(int signal)
@@ -997,6 +1018,12 @@ void packet_dump(char *user, struct pcap_pkthdr *pkthdr, u_char *pkt)
     
     if(rt_config.restart_requested == 1)
         dl_restart();
+    
+    if(rt_config.dump_stats_requested == 1)
+    {
+        rt_config.dump_stats_requested = 0;
+        dl_dump_stats();
+    }
 
     pcap_dump((u_char *) rt_config.pdp, pkthdr, pkt);
     if(rt_config.flush_flag)
@@ -1410,6 +1437,7 @@ int main(int argc, char *argv[])
     signal(SIGQUIT, quitter);    if(errno!=0) errno=0;
     signal(SIGHUP, restarter);   if(errno!=0) errno=0;
     signal(SIGALRM, dl_shutdown);  if(errno!=0) errno=0;
+    signal(SIGUSR1, dump_stats); if(errno!=0) errno=0;
     
     memset(&rt_config, 0, sizeof(rt_config_t));
 
