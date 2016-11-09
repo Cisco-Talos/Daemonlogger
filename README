@@ -95,5 +95,6 @@ BPF Filter:
     You can specify BPF filter commands after the command line switches just 
 like in tcpdump or Snort.
 
-This code is largely untested and probably completely shoddy.  YMMV.  Write me 
-if you find bugs or want features!
+This code is largely untested and probably completely shoddy.  YMMV.  Write us on the 
+Daemonlogger Users list: https://lists.sourceforge.net/lists/listinfo/daemonlogger-users 
+if you have any questions!
