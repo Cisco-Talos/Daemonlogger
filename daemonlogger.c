@@ -432,7 +432,7 @@ char *get_filename()
     {
         if(snprintf(rt_config.logdir, 
                     STDBUF, 
-                    "%s/%s.%lu", 
+                    "%s/%s.%lu.pcap", 
                     rt_config.logpath, 
                     rt_config.logfilename, 
                     (long unsigned int) currtime) < 0)
@@ -442,7 +442,7 @@ char *get_filename()
     {
         if(snprintf(rt_config.logdir, 
                     STDBUF, 
-                    "%s.%lu",
+                    "%s.%lu.pcap",
                     rt_config.logfilename,
                     (long unsigned int) currtime) < 0)
             return NULL;        
