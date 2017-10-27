@@ -432,7 +432,7 @@ char *get_filename()
     {
         if(snprintf(rt_config.logdir, 
                     STDBUF, 
-                    "%s/%s.%lu", 
+                    "%s/%s.%lu.pcap", 
                     rt_config.logpath, 
                     rt_config.logfilename, 
                     (long unsigned int) currtime) < 0)
@@ -442,7 +442,7 @@ char *get_filename()
     {
         if(snprintf(rt_config.logdir, 
                     STDBUF, 
-                    "%s.%lu",
+                    "%s.%lu.pcap",
                     rt_config.logfilename,
                     (long unsigned int) currtime) < 0)
             return NULL;        
@@ -1415,7 +1415,7 @@ int main(int argc, char *argv[])
 
     rt_config.rollsize = 2 * (GIGABYTE);
 
-    rt_config.logfilename = strdup("daemonlogger.pcap");
+    rt_config.logfilename = strdup("daemonlogger");
 
     parse_cmd_line(argc, argv);
 
