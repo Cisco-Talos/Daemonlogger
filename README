@@ -1,7 +1,8 @@
 DaemonLogger: Simple packet logging & soft tap daemon.
 Version 1.2.1
 
-Copyright (C) 2006-2008 Sourcefire Inc.
+Copyright (C) 2013-2017 Cisco Systems, Inc.
+Copyright (C) 2006-2013 Sourcefire Inc.
 Author: Martin Roesch <roesch@sourcefire.com>
 
 This is a libpcap-based program.  It has two runtime modes:
@@ -19,7 +20,7 @@ tap mode (using the -o switch) then logging to disk is disabled.
 License:
 
 GPL v2.  Make SURE you read the included COPYING file so that you understand 
-how this file is licensed by Sourcefire, even though it's under the GPL v2 
+how this file is licensed by Cisco, even though it's under the GPL v2 
 there are some clarifications that we have made regarding the licensing of 
 this program.
 
