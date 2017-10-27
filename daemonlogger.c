@@ -1415,7 +1415,7 @@ int main(int argc, char *argv[])
 
     rt_config.rollsize = 2 * (GIGABYTE);
 
-    rt_config.logfilename = strdup("daemonlogger.pcap");
+    rt_config.logfilename = strdup("daemonlogger");
 
     parse_cmd_line(argc, argv);
 
