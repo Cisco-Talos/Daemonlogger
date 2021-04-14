@@ -1,7 +1,7 @@
 DaemonLogger: Simple packet logging & soft tap daemon.
 Version 1.2.1
 
-Copyright (C) 2013-2017 Cisco Systems, Inc.
+Copyright (C) 2013-2021 Cisco Systems, Inc.
 Copyright (C) 2006-2013 Sourcefire Inc.
 Author: Martin Roesch <roesch@sourcefire.com>
 
