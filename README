@@ -35,6 +35,7 @@ daemonlogger [switches] [bpf filter]
 
 Switches:
 
+    -B <bytes>      Set packet capture buffer size
     -c <count>      Capture <count> packets and exit.
     -d              Daemonize at startup.
     -f <bpf file>   Load BPF filter from <bpf file>.
